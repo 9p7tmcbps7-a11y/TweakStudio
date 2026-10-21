@@ -1,6 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <Preferences/PSListController.h>
 #import <Preferences/PSSpecifier.h>
+#import "TSRootListController.h"
 #import <spawn.h>
 #import <sys/wait.h>
 #import <unistd.h>
@@ -9,7 +10,7 @@
 
 extern char **environ;
 
-@interface TSRootListController : PSListController
+@interface TSRootListController ()
 @property (nonatomic, copy) NSString *projectName;
 @property (nonatomic, copy) NSString *lastProjectPath;
 @property (nonatomic, copy) NSString *lastDebPath;
@@ -23,6 +24,17 @@ extern char **environ;
     self.projectName = [[NSUserDefaults standardUserDefaults] stringForKey:@"TSProjectName"] ?: @"HelloTweak";
     self.lastProjectPath = [[NSUserDefaults standardUserDefaults] stringForKey:@"TSLastProjectPath"];
     self.lastDebPath = [[NSUserDefaults standardUserDefaults] stringForKey:@"TSLastDebPath"];
+    if (!self.lastProjectPath || ![NSFileManager.defaultManager fileExistsAtPath:self.lastProjectPath]) {
+        NSArray<NSString *> *projects = [NSFileManager.defaultManager contentsOfDirectoryAtPath:[self workspacePath] error:nil];
+        NSDate *latestDate = [NSDate distantPast];
+        for (NSString *project in projects) {
+            NSString *candidate = [[self workspacePath] stringByAppendingPathComponent:project];
+            BOOL isDirectory = NO;
+            if (![NSFileManager.defaultManager fileExistsAtPath:candidate isDirectory:&isDirectory] || !isDirectory) continue;
+            NSDate *modified = [[NSFileManager.defaultManager attributesOfItemAtPath:candidate error:nil] objectForKey:NSFileModificationDate] ?: [NSDate distantPast];
+            if ([modified compare:latestDate] == NSOrderedDescending) { latestDate = modified; self.lastProjectPath = candidate; self.projectName = project; }
+        }
+    }
     self.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeAlways;
 }
 
@@ -45,7 +57,7 @@ extern char **environ;
     [items addObject:[self button:@"Share latest package" action:@selector(sharePackage)]];
 
     [items addObject:[PSSpecifier groupSpecifierWithName:@"About"]];
-    PSSpecifier *about = [PSSpecifier preferenceSpecifierNamed:@"TweakStudio 0.2 · Rootless project workspace" target:nil set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
+    PSSpecifier *about = [PSSpecifier preferenceSpecifierNamed:@"TweakStudio 0.3 · Rootless project workspace" target:nil set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
     [items addObject:about];
     PSSpecifier *folder = [PSSpecifier preferenceSpecifierNamed:@"Projects are saved in Documents/TweakStudio/Projects" target:nil set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
     [items addObject:folder];
@@ -69,7 +81,7 @@ extern char **environ;
 }
 
 - (NSString *)workspacePath {
-    return [NSHomeDirectory() stringByAppendingPathComponent:@"Documents/TweakStudio/Projects"];
+    return @"/var/mobile/Documents/TweakStudio/Projects";
 }
 
 - (NSString *)validatedProjectName {
@@ -153,18 +165,18 @@ extern char **environ;
 }
 
 - (void)setupTheos {
-    NSString *cmd = @"set -e; export PATH=\"/var/jb/usr/bin:/var/jb/bin:$PATH\"; if [ ! -f \"$HOME/theos/makefiles/common.mk\" ]; then git clone --depth 1 --recursive https://github.com/theos/theos.git \"$HOME/theos\"; fi; THEOS=\"$HOME/theos\" \"$HOME/theos/bin/install-sdk\" latest; mkdir -p \"$HOME/Documents/TweakStudio/tools\" \"$HOME/Documents/TweakStudio/bin\"; if [ ! -f \"$HOME/Documents/TweakStudio/tools/allemande/main.cpp\" ]; then git clone --depth 1 https://github.com/p0358/allemande.git \"$HOME/Documents/TweakStudio/tools/allemande\"; fi; clang++ -std=c++20 -O2 -o \"$HOME/Documents/TweakStudio/bin/allemande\" \"$HOME/Documents/TweakStudio/tools/allemande/main.cpp\"; chmod 755 \"$HOME/Documents/TweakStudio/bin/allemande\"";
+    NSString *cmd = @"set -e; export PATH=\"/var/jb/usr/bin:/var/jb/bin:$PATH\"; WORKSPACE=/var/mobile/Documents/TweakStudio; THEOS=\"$WORKSPACE/theos\"; mkdir -p \"$WORKSPACE\"; if [ ! -f \"$THEOS/makefiles/common.mk\" ]; then git clone --depth 1 --recursive https://github.com/theos/theos.git \"$THEOS\"; fi; THEOS=\"$THEOS\" \"$THEOS/bin/install-sdk\" latest; mkdir -p \"$WORKSPACE/tools\" \"$WORKSPACE/bin\"; if [ ! -f \"$WORKSPACE/tools/allemande/main.cpp\" ]; then git clone --depth 1 https://github.com/p0358/allemande.git \"$WORKSPACE/tools/allemande\"; fi; clang++ -std=c++20 -O2 -o \"$WORKSPACE/bin/allemande\" \"$WORKSPACE/tools/allemande/main.cpp\"; chmod 755 \"$WORKSPACE/bin/allemande\"";
     [self runCommand:cmd title:@"Preparing Theos and the iOS SDK…"];
 }
 
 - (void)buildProject {
     if (!self.lastProjectPath || ![NSFileManager.defaultManager fileExistsAtPath:self.lastProjectPath]) { [self alert:@"No project yet" message:@"Create a project first."]; return; }
-    NSString *cmd = [NSString stringWithFormat:@"export THEOS=\"$HOME/theos\"; export PATH=\"/var/jb/usr/bin:/var/jb/bin:/usr/bin:/bin:$PATH\"; /var/jb/usr/libexec/tweakstudio/build-project '%@'", self.lastProjectPath];
+    NSString *cmd = [NSString stringWithFormat:@"export THEOS=/var/mobile/Documents/TweakStudio/theos; export PATH=\"/var/jb/usr/bin:/var/jb/bin:/usr/bin:/bin:$PATH\"; /var/jb/usr/libexec/tweakstudio/build-project '%@'", self.lastProjectPath];
     [self runCommand:cmd title:@"Building project…"];
 }
 
 - (void)runCommand:(NSString *)command title:(NSString *)title {
-    UIAlertController *progress = [UIAlertController alertControllerWithTitle:title message:@"This may take a few minutes. Keep Settings open." preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertController *progress = [UIAlertController alertControllerWithTitle:title message:@"This may take a few minutes. Keep TweakStudio open." preferredStyle:UIAlertControllerStyleAlert];
     [self presentViewController:progress animated:YES completion:nil];
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
         int fds[2];

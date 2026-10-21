@@ -1,8 +1,8 @@
 Package: com.tweakstudio.ios
 Name: TweakStudio
-Version: 0.2.0
+Version: 0.3.0
 Architecture: iphoneos-arm64
-Description: UI-based on-device Theos project editor and builder
+Description: Home Screen and Settings UI for on-device Theos development
 Maintainer: TweakStudio Contributors
 Section: Development
-Depends: firmware (>= 15.0), preferenceloader, theos-dependencies, bash, coreutils, dpkg, make, odcctools, ldid, clang, perl, rsync, findutils, git, curl, xz
+Depends: firmware (>= 15.0), preferenceloader, uikittools, theos-dependencies, bash, coreutils, dpkg, make, odcctools, ldid, clang, perl, rsync, findutils, git, curl, xz

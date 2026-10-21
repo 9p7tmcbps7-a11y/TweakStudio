@@ -1,0 +1,9 @@
+#!/bin/sh
+set -e
+APP="/var/jb/Applications/TweakStudioApp.app"
+if [ -x /var/jb/usr/bin/uicache ]; then
+  /var/jb/usr/bin/uicache -p "$APP" || /var/jb/usr/bin/uicache -a || true
+elif command -v uicache >/dev/null 2>&1; then
+  uicache -p "$APP" || uicache -a || true
+fi
+exit 0

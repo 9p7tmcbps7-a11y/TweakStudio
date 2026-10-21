@@ -2,8 +2,8 @@
 set -euo pipefail
 
 PROJECT="${1:-}"
-THEOS="${THEOS:-$HOME/theos}"
-BIN="$HOME/Documents/TweakStudio/bin"
+THEOS="${THEOS:-/var/mobile/Documents/TweakStudio/theos}"
+BIN="/var/mobile/Documents/TweakStudio/bin"
 ALLEMANDE="$BIN/allemande"
 
 if [[ -z "$PROJECT" || ! -d "$PROJECT" ]]; then

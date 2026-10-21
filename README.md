@@ -1,10 +1,11 @@
-# TweakStudio
+# TweakStudio 0.3.0
 
-TweakStudio is a UI-first, rootless iOS developer workspace for Dopamine-style jailbreaks. It appears inside **Settings** and lets you create tweak or UIKit app projects, edit their source and Makefile in a native editor, run Theos builds on the phone, and share the resulting `.deb` through the iOS share sheet.
+TweakStudio is a UI-first, rootless iOS developer workspace for Dopamine-style jailbreaks. It now installs both a dedicated **Home Screen app with its own icon** and a **Settings → TweakStudio** pane. Both host the same project editor and build workflow.
 
 ## What it does
 
 - Creates starter Theos projects for Logos/Objective-C tweaks and UIKit apps.
+- Installs a native Home Screen app at `/var/jb/Applications/TweakStudioApp.app`; a post-install hook refreshes the jailbreak app registry so SpringBoard can show its icon.
 - Switches between existing projects and edits their primary source file, Makefile, package control file, and project/filter plist in a native text editor.
 - Installs the Theos source tree and latest iOS SDK using the **Set up Theos + iOS SDK** button. The package depends on Procursus' `theos-dependencies`, `git`, `curl`, and `xz` packages.
 - Builds the current project on-device with Theos, converts legacy arm64e output with `allemande`, and stores package output in the project's `packages/` directory.
@@ -14,17 +15,17 @@ This is an early open-source release. The toolchain bootstrap and package build 
 
 ## Install and use
 
-Download the prebuilt package from the [TweakStudio 0.2.0 GitHub release](https://github.com/9p7tmcbps7-a11y/TweakStudio/releases/download/v0.2.0/tweakstudio_0.2.0_iphoneos-arm64.deb).
+Download the prebuilt package from the [TweakStudio 0.3.0 GitHub release](https://github.com/9p7tmcbps7-a11y/TweakStudio/releases/download/v0.3.0/tweakstudio_0.3.0_iphoneos-arm64.deb).
 
 1. Install the rootless `com.tweakstudio.ios` package using Sileo or Zebra.
-2. Open **Settings → TweakStudio**.
+2. Open the new **TweakStudio** Home Screen icon, or use **Settings → TweakStudio**.
 3. Enter a project name, then tap **New tweak project** or **New app project**.
 4. Tap **Edit project source** to modify the source, Makefile, or package control file. Save before leaving the editor.
 5. Tap **Set up Theos + iOS SDK** once. This downloads the Theos source tree, the latest iOS SDK, and builds `allemande` into the TweakStudio tools folder. The package manager supplies compiler/build tools.
 6. Tap **Build current project (.deb)**. The result is saved inside that project's `packages/` folder.
 7. Tap **Share latest package** and choose Sileo or Zebra to import/install it.
 
-Projects are stored at `~/Documents/TweakStudio/Projects/`. The UI remembers the current project and provides a project picker.
+Projects are stored at `/var/mobile/Documents/TweakStudio/Projects/`, shared between the Home Screen app and Settings pane. The workspace/toolchain lives at `/var/mobile/Documents/TweakStudio/` so both entry points use the same Theos installation.
 
 ## Build the package from source
 
@@ -43,7 +44,7 @@ On non-macOS hosts, Theos may emit an older arm64e ABI. TweakStudio's on-device 
 - Rootless package layout: `/var/jb`
 - Intended environment: Dopamine rootless; package deployment target iOS 15+
 - Device target for the requested use case: iPhone 11 Pro Max, iOS 18.4.1
-- Device installation and runtime verification: not yet performed
+- Home Screen app and Settings pane are packaged together; physical-device installation/runtime verification has not yet been performed
 
 ## License
 
