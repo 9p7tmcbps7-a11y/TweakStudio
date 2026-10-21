@@ -1,13 +1,13 @@
-# TweakStudio 0.4.0
+# TweakStudio 0.4.1
 
-TweakStudio is a native, rootless iOS workspace for creating Theos tweak and UIKit app projects on a jailbroken iPhone. Version 0.4.0 adds an offline local-model agent, an importable GGUF library, local prompt skills, transparent logs, bounded build repair, and private GitHub publishing.
+TweakStudio is a native, rootless iOS workspace for creating Theos tweak and UIKit app projects on a jailbroken iPhone. Version 0.4.1 adds an offline local-model agent, an importable GGUF library, local prompt skills, transparent logs, bounded build repair, and private GitHub publishing.
 
 ## What is included
 
 - A dedicated Home Screen app with a minimal six-tab interface: **Workspace**, **AI Agent**, **Models**, **Skills**, **Activity**, and **Settings**. The Settings pane remains available as a fallback.
 - Starter projects for Logos/Objective-C tweaks and UIKit apps, with an editable native source editor. Generated UIKit apps include a replaceable TweakStudio placeholder icon set and a rootless post-install `uicache` hook so Sileo can register the app on the Home Screen.
 - A bundled, CPU-only arm64 `llama-server` built from llama.cpp commit `339f3242c761f16c27e5ffcde1d35dcc31933a55`, plus its versioned dylibs and symlinks. The runner is separate from model files: **no GGUF model is bundled**.
-- Import and select `.gguf` files through the iOS document picker. Inference runs on `127.0.0.1`; the model is stopped when TweakStudio backgrounds. Small, quantized instruction/chat models are recommended, especially on 4 GB devices; base completion models may not follow chat formatting.
+- Import `.gguf` files through the iOS in-place document picker; large files copy in the background with coordinated file-provider access and visible status. Inference runs on `127.0.0.1`; the model is stopped when TweakStudio backgrounds. Small, quantized instruction/chat models are recommended, especially on 4 GB devices; base completion models may not follow chat formatting.
 - Imported local Markdown/text skills with search and per-skill enable switches. Search covers the imported notes on the phone only; it is not a web search or online marketplace. Skills are prompt reference material, not executable plugins.
 - Chat that reads the selected project's source context and enabled skills. It can propose source and non-executable metadata file replacements. The complete proposed files are shown in a review screen; manual changes are backed up before application.
 - On-device Theos builds, package sharing, activity events, complete latest build output, and the llama-server log.
@@ -16,16 +16,16 @@ TweakStudio is a native, rootless iOS workspace for creating Theos tweak and UIK
 
 ## Install and start
 
-Download the rootless Debian package from the [TweakStudio 0.4.0 GitHub release](https://github.com/9p7tmcbps7-a11y/TweakStudio/releases/download/v0.4.0/tweakstudio_0.4.0_iphoneos-arm64.deb), then install or upgrade `com.tweakstudio.ios` with Sileo or Zebra. If the icon does not appear after installation, respring once.
+Download the rootless Debian package from the [TweakStudio 0.4.1 GitHub release](https://github.com/9p7tmcbps7-a11y/TweakStudio/releases/download/v0.4.1/tweakstudio_0.4.1_iphoneos-arm64.deb), then install or upgrade `com.tweakstudio.ios` with Sileo or Zebra. If the icon does not appear after installation, respring once.
 
 1. Open the **TweakStudio** Home Screen icon. Create an **iOS tweak** or **iOS app**, or choose **Build from an idea** to create a starter and send your description to the Agent.
-2. In the app’s **Settings** tab, tap **Set up Theos + iOS SDK** once if you have not already prepared the on-device toolchain. This downloads Theos, an iOS SDK, and the arm64e compatibility helper; it requires a network connection and free storage. The older **Settings → TweakStudio** pane also remains available.
+2. In the app’s **Settings** tab, tap **Set up Theos + iOS SDK** once if you have not already prepared the on-device toolchain. This downloads Theos, an iOS SDK, and the arm64e compatibility helper; it requires a network connection and free storage. Setup resumes existing installs, avoids recompiling an up-to-date helper, and compiles that small helper with lower-memory settings. The older **Settings → TweakStudio** pane also remains available.
 3. In **Models**, tap **Import**, choose a `.gguf` file, then tap the imported model to load it. The model file stays in your workspace and is not included in project packages or GitHub uploads.
 4. Select a project in **Workspace**, open **AI Agent**, and describe a small feature. The model runs locally. Read the response and proposed files, open **Review**, and tap **Apply** only if you want those changes written.
 5. Tap **Build this project** in chat or select **Build .deb** from the project menu. TweakStudio runs its packaged Theos build helper and saves the actual compiler output under **Activity → Build**; toolchain setup and runner output are in **Setup** and **Runner**.
 6. On success, share the `.deb` into Sileo/Zebra or save it to Files. If a build fails, open **Activity → Build** and ask the Agent to diagnose it. The optional automatic repair loop is limited to two retries.
 
-Projects, skills, models, build logs, and runner logs are stored under `/var/mobile/Documents/TweakStudio/`. The app does not upload prompts or project files unless you explicitly use the GitHub publish action. Connecting to GitHub and publishing requires internet access.
+Projects, skills, models, build logs, and runner logs are stored under `/var/mobile/Documents/TweakStudio/`. To let the Home Screen app access that shared workspace and launch Theos tools, its executable is signed with Apple’s private `com.apple.private.security.no-container` entitlement. It runs as the `mobile` user—not root—but has broader access to files available to that user than a normal containerized app. Install only trusted TweakStudio builds. The Agent’s file-change allowlist does not change the app process’s filesystem permission. TweakStudio does not upload prompts or project files unless you explicitly use the GitHub publish action. Connecting to GitHub and publishing requires internet access.
 
 ## GitHub connection
 
@@ -36,7 +36,7 @@ In the app's **Settings** tab, create a GitHub personal access token with permis
 - TweakStudio is a developer workspace, not an App Store signing service. App distribution and code-signing requirements remain the developer's responsibility.
 - The bundled local runner is **CPU-only**. Performance and the largest usable context/model size depend on the model's quantization, free RAM, storage, and device thermals. The first model load can take time. Importing a model does not guarantee that it will fit in memory.
 - Treat GGUF files as untrusted input: import models only from sources you trust, because the local runtime must parse the file. The app does not verify model signatures or provenance.
-- The agent is a constrained code assistant, not a general shell operator or web-search engine. It cannot install packages, run arbitrary model-generated commands, or alter build scripts/package control through chat. It uses failure logs for bounded retry context but does not train or permanently learn. Review source proposals; code produced by local models may still be wrong or unsafe.
+- The agent is a constrained offline coding assistant, not Manus itself, a general shell operator, or a web-search engine. A small phone-run GGUF cannot match Manus’s larger hosted models, broader tools, and compute; this app instead supplies project/skill context, reviewed source proposals, Theos builds, build-log diagnosis, and bounded repair. It cannot install packages, run arbitrary model-generated commands, or alter build scripts/package control through chat. It uses failure logs for bounded retry context but does not train or permanently learn. Review source proposals; code produced by local models may still be wrong or unsafe.
 - The optional automatic repair switch is an explicit trade-off: when enabled, it applies allowlisted source/metadata changes and rebuilds without opening the manual review screen, for at most two attempts. It never installs the resulting `.deb`.
 - The GitHub token gives access according to the permissions you grant. Use **Disconnect & forget token** in Settings to remove the saved credential from this device, and revoke it in GitHub if it should no longer work.
 - The arm64 runner was cross-compiled for iOS 15.0+ with Theos/Clang and its internal dylib paths were rewritten to relocatable `@rpath` names. **This sandbox cannot launch iOS Mach-O binaries and the package has not been runtime-tested on a physical iPhone.** Please keep the prior working `.deb` available when upgrading and report device-side failures with the Activity logs.
@@ -52,7 +52,7 @@ export PATH="$THEOS/toolchain/linux/iphone/bin:$PATH"
 make clean package FINALPACKAGE=1
 ```
 
-The Debian package is rootless and intended for jailbreak package managers. On non-macOS hosts, the PreferenceBundle's arm64e slice still needs the documented Theos `allemande` conversion before it can be used on an A13-class target. `tools/release-package.sh` performs that conversion and uses Theos `dm.pl` to produce the gzip-control/LZMA-data archive format expected by common jailbreak package managers. The on-device helper already performs the corresponding conversion for generated packages.
+The Debian package is rootless and intended for jailbreak package managers. On non-macOS hosts, the PreferenceBundle's arm64e slice still needs the documented Theos `allemande` conversion before it can be used on an A13-class target. `tools/release-package.sh` performs that conversion, signs the Home Screen app with `TweakStudioApp/Entitlements.plist`, and uses Theos `dm.pl` to produce the gzip-control/LZMA-data archive format expected by common jailbreak package managers. A raw `make package` output is not the complete release package. The on-device helper performs the corresponding arm64e conversion for generated packages.
 
 ### Rebuild the local llama.cpp server
 

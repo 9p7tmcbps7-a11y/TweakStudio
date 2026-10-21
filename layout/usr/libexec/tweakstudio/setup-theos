@@ -1,17 +1,48 @@
 #!/var/jb/bin/bash
-set -euo pipefail
+set -Eeuo pipefail
 export PATH="/var/jb/usr/bin:/var/jb/bin:/usr/bin:/bin:$PATH"
 WORKSPACE="/var/mobile/Documents/TweakStudio"
 THEOS="$WORKSPACE/theos"
+mkdir -p "$WORKSPACE/Logs"
+exec > >(tee "$WORKSPACE/Logs/latest-setup.log") 2>&1
+trap 'status=$?; echo "[setup] FAILED (exit $status) near line $LINENO"; exit "$status"' ERR
+
+echo "[setup] Checking workspace and Theos source…"
 mkdir -p "$WORKSPACE"
 if [[ ! -f "$THEOS/makefiles/common.mk" ]]; then
-  git clone --depth 1 --recursive https://github.com/theos/theos.git "$THEOS"
+  if [[ -d "$THEOS/.git" ]]; then
+    echo "[setup] Completing existing Theos checkout…"
+    git -C "$THEOS" submodule update --init --recursive
+  elif [[ -e "$THEOS" ]]; then
+    echo "[setup] Found an incomplete non-Git Theos directory at $THEOS; preserving it. Remove/rename it manually only if you are sure it is disposable."
+    exit 2
+  else
+    echo "[setup] Downloading Theos and its submodules…"
+    git clone --depth 1 --recursive https://github.com/theos/theos.git "$THEOS"
+  fi
 fi
-THEOS="$THEOS" "$THEOS/bin/install-sdk" latest
+
+if ! find "$THEOS/sdks" -maxdepth 1 -name 'iPhoneOS*.sdk' -print -quit 2>/dev/null | grep -q .; then
+  echo "[setup] Downloading the latest iOS SDK…"
+  THEOS="$THEOS" "$THEOS/bin/install-sdk" latest
+else
+  echo "[setup] An iOS SDK is already installed; skipping the download."
+fi
+
 mkdir -p "$WORKSPACE/tools" "$WORKSPACE/bin"
-if [[ ! -f "$WORKSPACE/tools/allemande/main.cpp" ]]; then
-  git clone --depth 1 https://github.com/p0358/allemande.git "$WORKSPACE/tools/allemande"
+SOURCE="$WORKSPACE/tools/allemande/main.cpp"
+REPO="$WORKSPACE/tools/allemande"
+if [[ ! -f "$SOURCE" ]]; then
+  echo "[setup] Downloading the arm64e package helper source…"
+  git clone --depth 1 https://github.com/p0358/allemande.git "$REPO"
 fi
-clang++ -std=c++20 -O2 -o "$WORKSPACE/bin/allemande" "$WORKSPACE/tools/allemande/main.cpp"
-chmod 755 "$WORKSPACE/bin/allemande"
-echo "Theos, iOS SDK, and arm64e compatibility helper are ready."
+BINARY="$WORKSPACE/bin/allemande"
+if [[ ! -x "$BINARY" || "$SOURCE" -nt "$BINARY" ]]; then
+  echo "[setup] Compiling the small package helper with low-memory settings…"
+  clang++ -std=c++20 -O0 -g0 -o "$BINARY" "$SOURCE"
+  chmod 755 "$BINARY"
+else
+  echo "[setup] Package helper is already built; skipping compilation."
+fi
+
+echo "[setup] Theos, an iOS SDK, and the arm64e package helper are ready."
