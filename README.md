@@ -14,6 +14,8 @@ This is an early open-source release. The toolchain bootstrap and package build 
 
 ## Install and use
 
+Download the prebuilt package from the [TweakStudio 0.2.0 GitHub release](https://github.com/9p7tmcbps7-a11y/TweakStudio/releases/download/v0.2.0/tweakstudio_0.2.0_iphoneos-arm64.deb).
+
 1. Install the rootless `com.tweakstudio.ios` package using Sileo or Zebra.
 2. Open **Settings → TweakStudio**.
 3. Enter a project name, then tap **New tweak project** or **New app project**.
