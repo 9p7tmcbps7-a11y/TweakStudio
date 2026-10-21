@@ -57,7 +57,7 @@ extern char **environ;
     [items addObject:[self button:@"Share latest package" action:@selector(sharePackage)]];
 
     [items addObject:[PSSpecifier groupSpecifierWithName:@"About"]];
-    PSSpecifier *about = [PSSpecifier preferenceSpecifierNamed:@"TweakStudio 0.3 · Rootless project workspace" target:nil set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
+    PSSpecifier *about = [PSSpecifier preferenceSpecifierNamed:@"TweakStudio 0.3.1 · Rootless project workspace" target:nil set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
     [items addObject:about];
     PSSpecifier *folder = [PSSpecifier preferenceSpecifierNamed:@"Projects are saved in Documents/TweakStudio/Projects" target:nil set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
     [items addObject:folder];

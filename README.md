@@ -1,4 +1,4 @@
-# TweakStudio 0.3.0
+# TweakStudio 0.3.1
 
 TweakStudio is a UI-first, rootless iOS developer workspace for Dopamine-style jailbreaks. It now installs both a dedicated **Home Screen app with its own icon** and a **Settings → TweakStudio** pane. Both host the same project editor and build workflow.
 
@@ -15,9 +15,9 @@ This is an early open-source release. The toolchain bootstrap and package build 
 
 ## Install and use
 
-Download the prebuilt package from the [TweakStudio 0.3.0 GitHub release](https://github.com/9p7tmcbps7-a11y/TweakStudio/releases/download/v0.3.0/tweakstudio_0.3.0_iphoneos-arm64.deb).
+Download the prebuilt package from the [TweakStudio 0.3.1 GitHub release](https://github.com/9p7tmcbps7-a11y/TweakStudio/releases/download/v0.3.1/tweakstudio_0.3.1_iphoneos-arm64.deb). This hotfix corrects the PreferenceBundle executable metadata, adds the pane icon entry, and declares the app's iPhoneOS platform for LaunchServices.
 
-1. Install the rootless `com.tweakstudio.ios` package using Sileo or Zebra.
+1. Install or upgrade the rootless `com.tweakstudio.ios` package using Sileo or Zebra. Respring once if the icon or pane has not appeared after installation.
 2. Open the new **TweakStudio** Home Screen icon, or use **Settings → TweakStudio**.
 3. Enter a project name, then tap **New tweak project** or **New app project**.
 4. Tap **Edit project source** to modify the source, Makefile, or package control file. Save before leaving the editor.

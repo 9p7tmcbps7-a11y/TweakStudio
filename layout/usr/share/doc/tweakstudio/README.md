@@ -1,4 +1,4 @@
-TweakStudio installs both a Home Screen app icon and a Settings > TweakStudio pane. Both open the same native workspace for creating and editing rootless Theos tweak and UIKit app projects.
+TweakStudio 0.3.1 installs both a Home Screen app icon and a Settings > TweakStudio pane. Both open the same native workspace for creating and editing rootless Theos tweak and UIKit app projects.
 
 Quick start:
 1. Open Settings > TweakStudio and create a tweak or app project.

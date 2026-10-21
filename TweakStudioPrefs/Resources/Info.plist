@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
+  <key>CFBundleExecutable</key><string>TweakStudioPrefs</string>
   <key>CFBundleIdentifier</key><string>com.tweakstudio.ios.preferences</string>
   <key>CFBundleName</key><string>TweakStudio</string>
   <key>CFBundlePackageType</key><string>BNDL</string>
-  <key>CFBundleVersion</key><string>0.3.0</string>
-  <key>CFBundleShortVersionString</key><string>0.3.0</string>
+  <key>CFBundleVersion</key><string>0.3.1</string>
+  <key>CFBundleShortVersionString</key><string>0.3.1</string>
   <key>NSPrincipalClass</key><string>TSRootListController</string>
 </dict></plist>
