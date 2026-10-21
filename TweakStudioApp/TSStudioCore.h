@@ -25,6 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy, readonly, nullable) NSString *loadedModelPath;
 - (void)startModelAtPath:(NSString *)path completion:(void (^)(NSError * _Nullable error))completion;
 - (void)stopModel;
+- (void)stopModelWithCompletion:(void (^ _Nullable)(void))completion;
 - (void)sendMessages:(NSArray<NSDictionary *> *)messages
           maxTokens:(NSInteger)maxTokens
          completion:(void (^)(NSString * _Nullable reply, NSError * _Nullable error))completion;

@@ -116,8 +116,17 @@ extern char **environ;
     }] resume];
 }
 - (void)stopModel {
-    if (self.serverPID > 0) { pid_t pid=self.serverPID; self.serverPID=0; kill(pid,SIGTERM); dispatch_async(dispatch_get_global_queue(QOS_CLASS_UTILITY,0), ^{ int status=0; waitpid(pid,&status,0); }); }
+    [self stopModelWithCompletion:nil];
+}
+- (void)stopModelWithCompletion:(void (^)(void))completion {
+    pid_t pid=self.serverPID;
+    if (pid > 0) { self.serverPID=0; kill(pid,SIGTERM); }
     self.running = NO; self.loadedModelPath = nil;
+    if (pid <= 0) { if(completion) dispatch_async(dispatch_get_main_queue(), completion); return; }
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_UTILITY,0), ^{
+        int status=0; waitpid(pid,&status,0);
+        if(completion) dispatch_async(dispatch_get_main_queue(), completion);
+    });
 }
 - (void)sendMessages:(NSArray<NSDictionary *> *)messages maxTokens:(NSInteger)maxTokens completion:(void (^)(NSString *, NSError *))completion {
     if (!self.running) { completion(nil, [NSError errorWithDomain:@"TweakStudio.Model" code:14 userInfo:@{NSLocalizedDescriptionKey:@"Load a local model before chatting."}]); return; }

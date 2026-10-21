@@ -3,8 +3,6 @@ set -euo pipefail
 
 PROJECT="${1:-}"
 THEOS="${THEOS:-/var/mobile/Documents/TweakStudio/theos}"
-BIN="/var/mobile/Documents/TweakStudio/bin"
-ALLEMANDE="$BIN/allemande"
 
 if [[ -z "$PROJECT" || ! -d "$PROJECT" ]]; then
   echo "No project folder was supplied or the folder does not exist." >&2
@@ -14,14 +12,15 @@ if [[ ! -f "$THEOS/makefiles/common.mk" ]]; then
   echo "Theos is not set up. Tap Set up Theos + iOS SDK in the TweakStudio Settings tab." >&2
   exit 3
 fi
-if [[ ! -x "$ALLEMANDE" ]]; then
-  echo "The arm64e compatibility helper is missing. Run Set up Theos + iOS SDK first." >&2
-  exit 4
+if [[ -f "$PROJECT/Makefile" ]] && grep -Eq '^[[:space:]]*ARCHS[[:space:]]*[:?+]?=.*arm64e' "$PROJECT/Makefile"; then
+  echo "This project still requests arm64e. TweakStudio 0.4.2 avoids the phone-side ABI converter; change its Makefile to 'ARCHS := arm64' and rebuild. Your source files are unchanged." >&2
+  exit 6
 fi
 
 export THEOS
 export PATH="/var/jb/usr/bin:/var/jb/bin:$THEOS/toolchain/iphone/bin:$PATH"
 cd "$PROJECT"
+echo "Building with the on-device Theos toolchain. TweakStudio starters use arm64 and need no external ABI converter."
 make clean package
 
 DEB="$(ls -t "$PROJECT"/packages/*.deb 2>/dev/null | head -n 1 || true)"
@@ -35,14 +34,6 @@ trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/root/DEBIAN"
 dpkg-deb -x "$DEB" "$TMP/root"
 dpkg-deb -e "$DEB" "$TMP/root/DEBIAN"
-while IFS= read -r -d '' BINARY; do
-  if /var/jb/usr/bin/otool -hv "$BINARY" 2>/dev/null | grep -q 'arm64e'; then
-    "$ALLEMANDE" "$BINARY" "$TMP/converted"
-    /var/jb/usr/bin/ldid -s "$TMP/converted"
-    /var/jb/usr/bin/ldid -S "$TMP/converted"
-    mv "$TMP/converted" "$BINARY"
-  fi
-done < <(find "$TMP/root" -type f -not -path '*/DEBIAN/*' -print0)
 dpkg-deb -b --root-owner-group "$TMP/root" "$TMP/repacked.deb"
 mv "$TMP/repacked.deb" "$DEB"
 echo "Prepared rootless package: $DEB"

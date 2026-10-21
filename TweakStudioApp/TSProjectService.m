@@ -32,7 +32,7 @@ extern char **environ;
     NSString *bundleID = [NSString stringWithFormat:@"com.example.%@", name.lowercaseString];
     NSString *makefile, *control, *primary;
     if ([type isEqualToString:@"tweak"]) {
-        makefile = [NSString stringWithFormat:@"THEOS ?= $(HOME)/theos\nTARGET := iphone:clang:latest:15.0\nARCHS := arm64 arm64e\nTHEOS_PACKAGE_SCHEME := rootless\ninclude $(THEOS)/makefiles/common.mk\nTWEAK_NAME := %@\n%@_FILES := Tweak.xm\ninclude $(THEOS_MAKE_PATH)/tweak.mk\n", name, name];
+        makefile = [NSString stringWithFormat:@"THEOS ?= $(HOME)/theos\nTARGET := iphone:clang:latest:15.0\nARCHS := arm64\nTHEOS_PACKAGE_SCHEME := rootless\ninclude $(THEOS)/makefiles/common.mk\nTWEAK_NAME := %@\n%@_FILES := Tweak.xm\ninclude $(THEOS_MAKE_PATH)/tweak.mk\n", name, name];
         control = [NSString stringWithFormat:@"Package: %@\nName: %@\nVersion: 0.1.0\nArchitecture: iphoneos-arm64\nDescription: Rootless iOS tweak\nMaintainer: Developer\nSection: Tweaks\n", bundleID, name];
         primary = [NSString stringWithFormat:@"#import <Foundation/Foundation.h>\n\n%%ctor {\n    NSLog(@\"[%@] Loaded.\");\n}\n", name];
         [@"{ Filter = { Bundles = (\"com.apple.springboard\"); }; }\n" writeToFile:[path stringByAppendingPathComponent:[name stringByAppendingString:@".plist"]] atomically:YES encoding:NSUTF8StringEncoding error:nil];

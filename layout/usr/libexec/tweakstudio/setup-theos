@@ -3,18 +3,17 @@ set -Eeuo pipefail
 export PATH="/var/jb/usr/bin:/var/jb/bin:/usr/bin:/bin:$PATH"
 WORKSPACE="/var/mobile/Documents/TweakStudio"
 THEOS="$WORKSPACE/theos"
-mkdir -p "$WORKSPACE/Logs"
+mkdir -p "$WORKSPACE/Logs" "$WORKSPACE"
 exec > >(tee "$WORKSPACE/Logs/latest-setup.log") 2>&1
 trap 'status=$?; echo "[setup] FAILED (exit $status) near line $LINENO"; exit "$status"' ERR
 
 echo "[setup] Checking workspace and Theos source…"
-mkdir -p "$WORKSPACE"
 if [[ ! -f "$THEOS/makefiles/common.mk" ]]; then
   if [[ -d "$THEOS/.git" ]]; then
     echo "[setup] Completing existing Theos checkout…"
     git -C "$THEOS" submodule update --init --recursive
   elif [[ -e "$THEOS" ]]; then
-    echo "[setup] Found an incomplete non-Git Theos directory at $THEOS; preserving it. Remove/rename it manually only if you are sure it is disposable."
+    echo "[setup] Found an incomplete non-Git Theos directory at $THEOS; preserving it. Remove or rename it manually only if you are sure it is disposable."
     exit 2
   else
     echo "[setup] Downloading Theos and its submodules…"
@@ -29,20 +28,4 @@ else
   echo "[setup] An iOS SDK is already installed; skipping the download."
 fi
 
-mkdir -p "$WORKSPACE/tools" "$WORKSPACE/bin"
-SOURCE="$WORKSPACE/tools/allemande/main.cpp"
-REPO="$WORKSPACE/tools/allemande"
-if [[ ! -f "$SOURCE" ]]; then
-  echo "[setup] Downloading the arm64e package helper source…"
-  git clone --depth 1 https://github.com/p0358/allemande.git "$REPO"
-fi
-BINARY="$WORKSPACE/bin/allemande"
-if [[ ! -x "$BINARY" || "$SOURCE" -nt "$BINARY" ]]; then
-  echo "[setup] Compiling the small package helper with low-memory settings…"
-  clang++ -std=c++20 -O0 -g0 -o "$BINARY" "$SOURCE"
-  chmod 755 "$BINARY"
-else
-  echo "[setup] Package helper is already built; skipping compilation."
-fi
-
-echo "[setup] Theos, an iOS SDK, and the arm64e package helper are ready."
+echo "[setup] Theos and the iOS SDK are ready. No compiler/helper is built on the phone. TweakStudio starter projects target arm64, which is supported by this device."

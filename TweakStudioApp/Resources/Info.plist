@@ -7,8 +7,8 @@
   <key>CFBundleDisplayName</key><string>TweakStudio</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleSignature</key><string>????</string>
-  <key>CFBundleVersion</key><string>0.4.1</string>
-  <key>CFBundleShortVersionString</key><string>0.4.1</string>
+  <key>CFBundleVersion</key><string>0.4.2</string>
+  <key>CFBundleShortVersionString</key><string>0.4.2</string>
   <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
   <key>CFBundleSupportedPlatforms</key><array><string>iPhoneOS</string></array>
   <key>NSAppTransportSecurity</key><dict><key>NSAllowsLocalNetworking</key><true/></dict>

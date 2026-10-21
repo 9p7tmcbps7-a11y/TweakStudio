@@ -57,7 +57,7 @@ extern char **environ;
     [items addObject:[self button:@"Share latest package" action:@selector(sharePackage)]];
 
     [items addObject:[PSSpecifier groupSpecifierWithName:@"About"]];
-    PSSpecifier *about = [PSSpecifier preferenceSpecifierNamed:@"TweakStudio 0.4.1 · Rootless project workspace" target:nil set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
+    PSSpecifier *about = [PSSpecifier preferenceSpecifierNamed:@"TweakStudio 0.4.2 · Rootless project workspace" target:nil set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
     [items addObject:about];
     PSSpecifier *folder = [PSSpecifier preferenceSpecifierNamed:@"Projects are saved in Documents/TweakStudio/Projects" target:nil set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
     [items addObject:folder];
@@ -111,7 +111,7 @@ extern char **environ;
     NSString *makefile = nil, *control = nil, *source = nil;
     NSString *sourceFile = nil;
     if ([type isEqualToString:@"tweak"]) {
-        makefile = [NSString stringWithFormat:@"THEOS ?= $(HOME)/theos\nTARGET := iphone:clang:latest:15.0\nARCHS := arm64 arm64e\nTHEOS_PACKAGE_SCHEME := rootless\nINSTALL_TARGET_PROCESSES := SpringBoard\ninclude $(THEOS)/makefiles/common.mk\nTWEAK_NAME := %@\n%@_FILES := Tweak.xm\ninclude $(THEOS_MAKE_PATH)/tweak.mk\n", name, name];
+        makefile = [NSString stringWithFormat:@"THEOS ?= $(HOME)/theos\nTARGET := iphone:clang:latest:15.0\nARCHS := arm64\nTHEOS_PACKAGE_SCHEME := rootless\nINSTALL_TARGET_PROCESSES := SpringBoard\ninclude $(THEOS)/makefiles/common.mk\nTWEAK_NAME := %@\n%@_FILES := Tweak.xm\ninclude $(THEOS_MAKE_PATH)/tweak.mk\n", name, name];
         control = [NSString stringWithFormat:@"Package: %@\nName: %@\nVersion: 0.1.0\nArchitecture: iphoneos-arm64\nDescription: Rootless tweak project\nMaintainer: Developer\nSection: Tweaks\n", bundleID, name];
         source = [NSString stringWithFormat:@"#import <Foundation/Foundation.h>\n\n%%ctor {\n    NSLog(@\"[%@] Loaded. Replace this starter with your tweak.\");\n}\n", name];
         sourceFile = @"Tweak.xm";
@@ -165,7 +165,7 @@ extern char **environ;
 }
 
 - (void)setupTheos {
-    NSString *cmd = @"set -e; export PATH=\"/var/jb/usr/bin:/var/jb/bin:$PATH\"; WORKSPACE=/var/mobile/Documents/TweakStudio; THEOS=\"$WORKSPACE/theos\"; mkdir -p \"$WORKSPACE\"; if [ ! -f \"$THEOS/makefiles/common.mk\" ]; then git clone --depth 1 --recursive https://github.com/theos/theos.git \"$THEOS\"; fi; THEOS=\"$THEOS\" \"$THEOS/bin/install-sdk\" latest; mkdir -p \"$WORKSPACE/tools\" \"$WORKSPACE/bin\"; if [ ! -f \"$WORKSPACE/tools/allemande/main.cpp\" ]; then git clone --depth 1 https://github.com/p0358/allemande.git \"$WORKSPACE/tools/allemande\"; fi; clang++ -std=c++20 -O2 -o \"$WORKSPACE/bin/allemande\" \"$WORKSPACE/tools/allemande/main.cpp\"; chmod 755 \"$WORKSPACE/bin/allemande\"";
+    NSString *cmd = @"exec /var/jb/usr/libexec/tweakstudio/setup-theos";
     [self runCommand:cmd title:@"Preparing Theos and the iOS SDK…"];
 }
 
@@ -195,7 +195,12 @@ extern char **environ;
         NSMutableData *data = [NSMutableData data];
         if (spawnError == 0) {
             char buffer[2048]; ssize_t n;
-            while ((n = read(fds[0], buffer, sizeof(buffer))) > 0) [data appendBytes:buffer length:(NSUInteger)n];
+            while ((n = read(fds[0], buffer, sizeof(buffer))) > 0) {
+                if (data.length < 2*1024*1024) {
+                    NSUInteger keep = MIN((NSUInteger)n, 2*1024*1024 - data.length);
+                    [data appendBytes:buffer length:keep];
+                }
+            }
         }
         close(fds[0]);
         int status = 0;

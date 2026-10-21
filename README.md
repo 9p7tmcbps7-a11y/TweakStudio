@@ -1,6 +1,6 @@
-# TweakStudio 0.4.1
+# TweakStudio 0.4.2
 
-TweakStudio is a native, rootless iOS workspace for creating Theos tweak and UIKit app projects on a jailbroken iPhone. Version 0.4.1 adds an offline local-model agent, an importable GGUF library, local prompt skills, transparent logs, bounded build repair, and private GitHub publishing.
+TweakStudio is a native, rootless iOS workspace for creating Theos tweak and UIKit app projects on a jailbroken iPhone. Version 0.4.2 keeps the local-model workspace and fixes the chat composer when the keyboard appears. It also removes on-phone C++ helper compilation from setup, a plausible cause of the repeated setup crash.
 
 ## What is included
 
@@ -10,16 +10,16 @@ TweakStudio is a native, rootless iOS workspace for creating Theos tweak and UIK
 - Import `.gguf` files through the iOS in-place document picker; large files copy in the background with coordinated file-provider access and visible status. Inference runs on `127.0.0.1`; the model is stopped when TweakStudio backgrounds. Small, quantized instruction/chat models are recommended, especially on 4 GB devices; base completion models may not follow chat formatting.
 - Imported local Markdown/text skills with search and per-skill enable switches. Search covers the imported notes on the phone only; it is not a web search or online marketplace. Skills are prompt reference material, not executable plugins.
 - Chat that reads the selected project's source context and enabled skills. It can propose source and non-executable metadata file replacements. The complete proposed files are shown in a review screen; manual changes are backed up before application.
-- On-device Theos builds, package sharing, activity events, complete latest build output, and the llama-server log.
+- On-device keyboard-aware chat composition with tap/scroll dismissal, Theos builds, package sharing, activity events, complete latest build output, and the llama-server log.
 - An opt-in **Automatic repair attempts** setting. For builds launched through the AI Agent, it allows at most two repair rounds; automatic proposals are restricted to source/non-executable metadata files, saved with backups, and rebuilt. It does not edit Makefiles or package control/scripts. Turn it off for manual review-only troubleshooting.
 - GitHub token verification and publishing the selected project's safe text files to a **private** repository. The token is stored in iOS Keychain. Hidden files, build outputs, model files, backups, and package archives are excluded.
 
 ## Install and start
 
-Download the rootless Debian package from the [TweakStudio 0.4.1 GitHub release](https://github.com/9p7tmcbps7-a11y/TweakStudio/releases/download/v0.4.1/tweakstudio_0.4.1_iphoneos-arm64.deb), then install or upgrade `com.tweakstudio.ios` with Sileo or Zebra. If the icon does not appear after installation, respring once.
+Download the rootless Debian package from the [TweakStudio 0.4.2 GitHub release](https://github.com/9p7tmcbps7-a11y/TweakStudio/releases/download/v0.4.2/tweakstudio_0.4.2_iphoneos-arm64.deb), then install or upgrade `com.tweakstudio.ios` with Sileo or Zebra. If the icon does not appear after installation, respring once.
 
 1. Open the **TweakStudio** Home Screen icon. Create an **iOS tweak** or **iOS app**, or choose **Build from an idea** to create a starter and send your description to the Agent.
-2. In the app’s **Settings** tab, tap **Set up Theos + iOS SDK** once if you have not already prepared the on-device toolchain. This downloads Theos, an iOS SDK, and the arm64e compatibility helper; it requires a network connection and free storage. Setup resumes existing installs, avoids recompiling an up-to-date helper, and compiles that small helper with lower-memory settings. The older **Settings → TweakStudio** pane also remains available.
+2. In the app’s **Settings** tab, tap **Set up Theos + iOS SDK** once if you have not already prepared the on-device toolchain. This downloads Theos and an iOS SDK; it requires a network connection and free storage. Setup resumes existing installs and does not clone or compile an extra C++ helper on the phone. New tweak starters target arm64, avoiding the converter step that caused the previous setup crash. The older **Settings → TweakStudio** pane also remains available.
 3. In **Models**, tap **Import**, choose a `.gguf` file, then tap the imported model to load it. The model file stays in your workspace and is not included in project packages or GitHub uploads.
 4. Select a project in **Workspace**, open **AI Agent**, and describe a small feature. The model runs locally. Read the response and proposed files, open **Review**, and tap **Apply** only if you want those changes written.
 5. Tap **Build this project** in chat or select **Build .deb** from the project menu. TweakStudio runs its packaged Theos build helper and saves the actual compiler output under **Activity → Build**; toolchain setup and runner output are in **Setup** and **Runner**.
@@ -52,7 +52,7 @@ export PATH="$THEOS/toolchain/linux/iphone/bin:$PATH"
 make clean package FINALPACKAGE=1
 ```
 
-The Debian package is rootless and intended for jailbreak package managers. On non-macOS hosts, the PreferenceBundle's arm64e slice still needs the documented Theos `allemande` conversion before it can be used on an A13-class target. `tools/release-package.sh` performs that conversion, signs the Home Screen app with `TweakStudioApp/Entitlements.plist`, and uses Theos `dm.pl` to produce the gzip-control/LZMA-data archive format expected by common jailbreak package managers. A raw `make package` output is not the complete release package. The on-device helper performs the corresponding arm64e conversion for generated packages.
+The Debian package is rootless and intended for jailbreak package managers. On non-macOS hosts, the PreferenceBundle's Linux-built arm64e slice still needs the documented Theos `allemande` conversion. `tools/release-package.sh` performs that conversion, signs the Home Screen app with `TweakStudioApp/Entitlements.plist`, and uses Theos `dm.pl` to produce the gzip-control/LZMA-data archive format expected by common jailbreak package managers. A raw `make package` output is not the complete release package. On-device starter projects target arm64 and use the iPhone's native Theos compiler, so setup/build no longer compile or run the host-side converter. If a tweak project created before 0.4.2 still has `ARCHS := arm64 arm64e`, change that line to `ARCHS := arm64` before building; the helper reports this case without modifying the Makefile.
 
 ### Rebuild the local llama.cpp server
 
