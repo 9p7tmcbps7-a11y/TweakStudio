@@ -1,9 +1,12 @@
-TweakStudio 0.3.2 installs both a Home Screen app icon and a Settings > TweakStudio pane. Both open the same native workspace for creating and editing rootless Theos tweak and UIKit app projects.
+# TweakStudio 0.4.0 quick start
 
-Quick start:
-1. Open Settings > TweakStudio and create a tweak or app project.
-2. Use Choose existing project and Edit project source to work on saved projects.
-3. Tap Set up Theos + iOS SDK once. This fetches Theos, the SDK, and the arm64e helper.
-4. Tap Build current project (.deb), then Share latest package to send it to Sileo/Zebra.
+1. Open the TweakStudio Home Screen icon; create/select a Theos tweak or UIKit app project.
+2. In the app's **Settings** tab, use **Set up Theos + iOS SDK** once. It downloads Theos, an iOS SDK, and the arm64e compatibility helper. Keep the app open and see **Activity → Setup** for output.
+3. Import a `.gguf` file in **Models** and tap it to load the on-device CPU runner. Smaller quantized models are recommended. Models are not included in the package or uploaded with source.
+4. Ask the local agent to implement a small feature. Review its complete proposed source/metadata files before **Apply**. Optional automatic build repairs are limited to two source-only rounds and never install a package.
+5. Build the project. Follow complete output in **Activity → Build**, then share the `.deb` to Sileo or Zebra.
+6. Install optional local `.md`/`.txt` reference skills in **Skills**. GitHub publishing to a private repository is an explicit action in **Settings**; the token is stored in iOS Keychain. **Disconnect & forget token** removes it from this device.
 
-Projects and Theos are stored under /var/mobile/Documents/TweakStudio so both entry points can use the same workspace. This early release has not been installed or runtime-tested on a physical iPhone. The arm64e helper's upstream documentation notes limitations, especially Swift; see the source README for details.
+Workspace: `/var/mobile/Documents/TweakStudio/`. Activity event log: `Logs/activity.jsonl`; build, setup, and local-runner output: `Logs/latest-build.log`, `Logs/latest-setup.log`, and `Logs/llama-server.log`.
+
+The bundled llama.cpp server is CPU-only arm64 with a 6144-token context configuration and listens on loopback. Device memory, model quantization, and thermals limit practical model size and speed. Physical-device runtime has not yet been validated for this release. TweakStudio does not bundle a GGUF model.

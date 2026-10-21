@@ -11,7 +11,7 @@ if [[ -z "$PROJECT" || ! -d "$PROJECT" ]]; then
   exit 2
 fi
 if [[ ! -f "$THEOS/makefiles/common.mk" ]]; then
-  echo "Theos is not set up. Tap Set up Theos + iOS SDK in Settings > TweakStudio." >&2
+  echo "Theos is not set up. Tap Set up Theos + iOS SDK in the TweakStudio Settings tab." >&2
   exit 3
 fi
 if [[ ! -x "$ALLEMANDE" ]]; then

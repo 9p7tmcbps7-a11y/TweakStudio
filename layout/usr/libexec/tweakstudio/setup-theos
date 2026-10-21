@@ -1,0 +1,17 @@
+#!/var/jb/bin/bash
+set -euo pipefail
+export PATH="/var/jb/usr/bin:/var/jb/bin:/usr/bin:/bin:$PATH"
+WORKSPACE="/var/mobile/Documents/TweakStudio"
+THEOS="$WORKSPACE/theos"
+mkdir -p "$WORKSPACE"
+if [[ ! -f "$THEOS/makefiles/common.mk" ]]; then
+  git clone --depth 1 --recursive https://github.com/theos/theos.git "$THEOS"
+fi
+THEOS="$THEOS" "$THEOS/bin/install-sdk" latest
+mkdir -p "$WORKSPACE/tools" "$WORKSPACE/bin"
+if [[ ! -f "$WORKSPACE/tools/allemande/main.cpp" ]]; then
+  git clone --depth 1 https://github.com/p0358/allemande.git "$WORKSPACE/tools/allemande"
+fi
+clang++ -std=c++20 -O2 -o "$WORKSPACE/bin/allemande" "$WORKSPACE/tools/allemande/main.cpp"
+chmod 755 "$WORKSPACE/bin/allemande"
+echo "Theos, iOS SDK, and arm64e compatibility helper are ready."

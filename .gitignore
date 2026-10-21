@@ -3,3 +3,4 @@ packages/
 *.deb
 *.dSYM/
 .DS_Store
+tools/.llama-build/

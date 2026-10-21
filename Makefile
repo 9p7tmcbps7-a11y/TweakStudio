@@ -16,9 +16,8 @@ include $(THEOS_MAKE_PATH)/bundle.mk
 
 APPLICATION_NAME = TweakStudioApp
 TweakStudioApp_ARCHS = arm64
-TweakStudioApp_FILES = TweakStudioApp/main.m TweakStudioPrefs/TSRootListController.m TweakStudioPrefs/TSEditorController.m
-TweakStudioApp_FRAMEWORKS = UIKit Foundation
-TweakStudioApp_PRIVATE_FRAMEWORKS = Preferences
+TweakStudioApp_FILES = TweakStudioApp/main.m TweakStudioApp/TSStudioCore.m TweakStudioApp/TSProjectService.m TweakStudioApp/TSTweakStudioUI.m TweakStudioPrefs/TSEditorController.m
+TweakStudioApp_FRAMEWORKS = UIKit Foundation Security UniformTypeIdentifiers
 TweakStudioApp_CFLAGS = -fobjc-arc -Wno-deprecated-declarations
 TweakStudioApp_RESOURCE_DIRS = TweakStudioApp/Resources
 TweakStudioApp_INSTALL_PATH = /Applications

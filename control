@@ -1,6 +1,6 @@
 Package: com.tweakstudio.ios
 Name: TweakStudio
-Version: 0.3.2
+Version: 0.4.0
 Architecture: iphoneos-arm64
 Description: Home Screen and Settings UI for on-device Theos development
 Maintainer: TweakStudio Contributors
