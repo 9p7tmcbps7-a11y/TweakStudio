@@ -31,4 +31,9 @@ NS_ASSUME_NONNULL_BEGIN
          completion:(void (^)(NSString * _Nullable reply, NSError * _Nullable error))completion;
 @end
 
+@interface TSAgentSearchService : NSObject
++ (void)searchGitHubRepositories:(NSString *)query
+                      completion:(void (^)(NSArray<NSDictionary *> *results, NSError * _Nullable error))completion;
+@end
+
 NS_ASSUME_NONNULL_END

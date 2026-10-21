@@ -2,7 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>application-identifier</key>
+    <string>com.tweakstudio.ios.app</string>
     <key>com.apple.private.security.no-container</key>
     <true/>
+    <key>keychain-access-groups</key>
+    <array>
+        <string>com.tweakstudio.ios.app</string>
+    </array>
 </dict>
 </plist>
